@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="XMenFulfillment.Api/XMenFulfillment.Api.csproj" />
+  <Project Path="XMenFulfillment.Tests/XMenFulfillment.Tests.csproj" />
+</Solution>
