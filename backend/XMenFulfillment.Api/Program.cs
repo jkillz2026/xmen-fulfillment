@@ -1,41 +1,52 @@
+using OpenAI;
+using XMenFulfillment.Api.Agents;
+using XMenFulfillment.Api.Hubs;
+using XMenFulfillment.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// ── OpenAI client ─────────────────────────────────────────────────────────────
+var openAiKey = builder.Configuration["OpenAI:ApiKey"]
+    ?? throw new InvalidOperationException("OpenAI:ApiKey is not configured. Add it to appsettings.Development.json.");
+
+builder.Services.AddSingleton(new OpenAIClient(openAiKey));
+
+// ── Worker agents (registered as IAgent) ─────────────────────────────────────
+builder.Services.AddSingleton<IAgent, CyclopsAgent>();
+builder.Services.AddSingleton<IAgent, BeastAgent>();
+builder.Services.AddSingleton<IAgent, WolverineAgent>();
+builder.Services.AddSingleton<IAgent, GambitAgent>();
+builder.Services.AddSingleton<IAgent, StormAgent>();
+builder.Services.AddSingleton<IAgent, JeanGreyAgent>();
+
+// ── Cerebro orchestrator + real-time broadcaster ────────────────────────────
+builder.Services.AddScoped<Cerebro>();
+builder.Services.AddScoped<AgentBroadcaster>();
+
+// ── In-memory stores ──────────────────────────────────────────────────────────
+builder.Services.AddSingleton<OrderStore>();
+builder.Services.AddSingleton<InventoryStore>();
+
+// ── API infrastructure ────────────────────────────────────────────────────────
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
     app.MapOpenApi();
-}
 
+app.UseCors();
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
+app.MapHub<AgentHub>("/hubs/agents");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
