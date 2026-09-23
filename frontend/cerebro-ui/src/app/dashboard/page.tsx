@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAgentHub, AgentEvent } from '../../hooks/useAgentHub';
 
 const AGENT_META: Record<string, { icon: string; color: string }> = {
@@ -41,12 +41,24 @@ export default function Dashboard() {
   const [reviewing, setReviewing] = useState(false);
   const [pipelineStatus, setPipelineStatus] = useState<string | null>(null);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
-  const [counter, setCounter] = useState(0);
+  const counterRef = useRef(0);
 
   const addEntry = useCallback((e: AgentEvent) => {
-    setCounter(n => {
-      setFeed(prev => [{ ...e, id: n }, ...prev]);
-      return n + 1;
+    setFeed(prev => {
+      if (e.type === 'completed') {
+        // Replace the matching 'started' card so the agent row transitions
+        // from "Running…" to "✓ Done" / "✗ Failed" in place.
+        const idx = prev.findIndex(
+          entry => entry.type === 'started' && 'agentName' in entry && entry.agentName === e.agentName
+        );
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = { ...e, id: prev[idx].id };
+          return updated;
+        }
+      }
+      // started, pipeline, or unmatched completed → prepend a new card
+      return [{ ...e, id: counterRef.current++ }, ...prev];
     });
     if (e.type === 'pipeline') setPipelineStatus((e as Extract<AgentEvent, { type: 'pipeline' }>).status);
   }, []);
