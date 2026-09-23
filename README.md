@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
+
 # X-Men Fulfillment System
 
 A multi-agent AI order fulfillment system built to demonstrate production-grade agentic patterns — LLM orchestration, tool-calling, saga/compensation, fraud routing, and human-in-the-loop — wrapped in a real-time dashboard. A team of X-Men, each powered by GPT tool-calling, processes orders through a live pipeline.
