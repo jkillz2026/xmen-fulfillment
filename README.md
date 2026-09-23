@@ -16,6 +16,10 @@ https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
 
 <img width="1676" height="879" alt="order-auto-rejected-due-to-fraud-score" src="https://github.com/user-attachments/assets/6acdf021-0ddb-48b3-bfb4-d2d674d9c616" />
 
+**Auto-reject** - item out of stock stops pipeline:
+
+<img width="1667" height="788" alt="out-of-stock-fail" src="https://github.com/user-attachments/assets/a7bf281c-a81a-43b6-b7ae-d6fd3352e948" />
+
 ---
 
 ## Architecture
