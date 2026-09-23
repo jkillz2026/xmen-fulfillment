@@ -10,7 +10,7 @@ A multi-agent AI order fulfillment system built to demonstrate production-grade 
      add 2–3 screenshots of the dashboard. Drop files in docs/ — they are already
      linked below. QuickTime screen recording or Kap (getkap.co) work well for GIFs. -->
 
-![Demo — order submitted, agents run in sequence, live SignalR feed updates](docs/demo.gif)
+![Demo — order submitted, agents run in sequence, live SignalR feed updates](docs/happy-path-order-success.gif)
 
 | Dashboard — live agent feed | Paused for human review |
 |---|---|
