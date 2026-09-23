@@ -1,6 +1,71 @@
 # X-Men Fulfillment System
 
-A multi-agent AI order fulfillment system where a team of X-Men — each powered by GPT-4o tool-calling — processes orders through a real-time pipeline. Built as a learning project to explore agentic AI patterns in a practical, end-to-end context.
+A multi-agent AI order fulfillment system built to demonstrate production-grade agentic patterns — LLM orchestration, tool-calling, saga/compensation, fraud routing, and human-in-the-loop — wrapped in a real-time dashboard. A team of X-Men, each powered by GPT tool-calling, processes orders through a live pipeline.
+
+---
+
+## Demo
+
+<!-- TODO: record a short demo GIF (submit order → agents light up in sequence) and
+     add 2–3 screenshots of the dashboard. Drop files in docs/ — they are already
+     linked below. QuickTime screen recording or Kap (getkap.co) work well for GIFs. -->
+
+![Demo — order submitted, agents run in sequence, live SignalR feed updates](docs/demo.gif)
+
+| Dashboard — live agent feed | Paused for human review |
+|---|---|
+| ![Dashboard](docs/screenshot-dashboard.png) | ![Human approval](docs/screenshot-approval.png) |
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+    UI["🖥️ Browser — Next.js dashboard :3000"]
+
+    subgraph API["ASP.NET Core API · :5016"]
+        Ctrl["OrdersController"]
+        Cerebro["🧠 Cerebro — orchestrator"]
+        Router["FraudRouter"]
+        Hub["SignalR AgentHub"]
+        Store[("OrderStore")]
+
+        subgraph Agents["Specialist agents — each runs its own GPT-4o-mini tool-calling loop"]
+            direction TB
+            Cyclops["👁️ Cyclops — validate order"]
+            Beast["🧬 Beast — fraud risk 0–100"]
+            Wolv["⚡ Wolverine — reserve inventory"]
+            Gambit["🃏 Gambit — payment auth + capture"]
+            Storm["⛈️ Storm — shipping rates + label"]
+            Jean["🔮 Jean Grey — confirmation email"]
+        end
+    end
+
+    OAI[("☁️ OpenAI API")]
+    Human["👤 Human reviewer"]
+
+    UI -->|"POST /orders"| Ctrl
+    Ctrl --> Cerebro
+    Cerebro -->|"1 · GPT-4o returns JSON plan"| OAI
+    Cerebro -->|"2 · dispatch plan steps"| Cyclops
+    Cyclops --> Beast
+    Beast --> Router
+    Router -->|"score < 30 — continue"| Wolv
+    Router -->|"30–69 — pause"| Human
+    Router -->|"70+ — reject"| Fail["pipeline fails"]
+    Human -->|"approve via UI → POST /orders/:id/approve"| Ctrl
+    Wolv --> Gambit
+    Gambit -->|"final batch — Task.WhenAll"| Storm
+    Gambit --> Jean
+    Gambit -.->|"on failure — compensate: release reservation"| Wolv
+    Agents -. "tool calls" .-> OAI
+    Cerebro -->|"AgentStarted / AgentCompleted / PipelineComplete"| Hub
+    Hub -. "SignalR push" .-> UI
+    Ctrl --- Store
+```
+
+**Flow:** `POST /orders` → Cerebro asks GPT-4o for a structured JSON plan → steps execute sequentially (final batch runs in parallel) → every event streams to the browser over SignalR. Beast's risk score routes through `FraudRouter`: under 30 continues, 30–69 pauses for human approval, 70+ rejects. Any failure triggers saga compensation — Wolverine releases reserved inventory.
 
 ---
 
