@@ -1,18 +1,22 @@
+# X-Men Fulfillment System
+
+A multi-agent AI order fulfillment system built to demonstrate production-grade agentic patterns — LLM orchestration, tool-calling, saga/compensation, fraud routing, and human-in-the-loop — wrapped in a real-time dashboard. A team of X-Men, each powered by GPT tool-calling, processes orders through a live pipeline.
+
+---
+
 ## Demo
 
 https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
 
-Human Intervention Required Due to Higher Potetential Fraud Score:
+**Human review required** — a moderate fraud score pauses the pipeline at `AwaitingApproval`:
 
 <img width="1676" height="814" alt="human-approval-required" src="https://github.com/user-attachments/assets/06006723-9784-4f8f-8fb6-8b3ecd8dbaab" />
 
-Order Auto-Rejected Due to Too High Fraud Score:
+**Auto-reject** — a high fraud score stops the pipeline before payment:
 
 <img width="1676" height="879" alt="order-auto-rejected-due-to-fraud-score" src="https://github.com/user-attachments/assets/6acdf021-0ddb-48b3-bfb4-d2d674d9c616" />
 
-# X-Men Fulfillment System
-
-A multi-agent AI order fulfillment system built to demonstrate production-grade agentic patterns — LLM orchestration, tool-calling, saga/compensation, fraud routing, and human-in-the-loop — wrapped in a real-time dashboard. A team of X-Men, each powered by GPT tool-calling, processes orders through a live pipeline.
+---
 
 ## Architecture
 
@@ -98,7 +102,7 @@ Storm and Jean Grey run **in parallel** via `Task.WhenAll`. Every agent uses the
 
 **Backend**
 - ASP.NET Core / .NET 10 — REST API + SignalR hub
-- OpenAI .NET SDK — GPT-4o tool-calling for all agents
+- OpenAI .NET SDK — GPT-4o for orchestration planning; GPT-4o-mini tool-calling for specialist agents
 
 **Frontend**
 - Next.js 16 (App Router) + Tailwind CSS
@@ -156,9 +160,10 @@ dotnet test XMenFulfillment.Tests
 
 ### Test Scenarios
 
-| `paymentMethodId` | What happens |
+| Trigger | What happens |
 |---|---|
 | `pm_ok_test` | Happy path — all agents complete |
-| `pm_ok_test` + price ≥ $500 | Beast flags risk → UI shows Approve / Reject buttons |
+| `pm_ok_test` + order total > $1,000, or a disposable email domain | Risk ≥ 30 → paused at `AwaitingApproval`; UI shows Approve / Reject |
+| Disposable email + high-risk country + total > $1,000 | Risk ≥ 70 → auto-rejected before payment |
 | `pm_capture_fail_*` | Gambit fails → Wolverine releases inventory (Saga) |
 | SKU `X-003` | Wolverine detects out-of-stock → pipeline fails |
