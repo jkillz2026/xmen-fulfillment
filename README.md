@@ -6,24 +6,13 @@ Human Intervention Required Due to Higher Potetential Fraud Score:
 
 <img width="1676" height="814" alt="human-approval-required" src="https://github.com/user-attachments/assets/06006723-9784-4f8f-8fb6-8b3ecd8dbaab" />
 
+Order Auto-Rejected Due to Too High Fraud Score:
+
+<img width="1676" height="879" alt="order-auto-rejected-due-to-fraud-score" src="https://github.com/user-attachments/assets/6acdf021-0ddb-48b3-bfb4-d2d674d9c616" />
 
 # X-Men Fulfillment System
 
 A multi-agent AI order fulfillment system built to demonstrate production-grade agentic patterns — LLM orchestration, tool-calling, saga/compensation, fraud routing, and human-in-the-loop — wrapped in a real-time dashboard. A team of X-Men, each powered by GPT tool-calling, processes orders through a live pipeline.
-
----
-
-## Demo
-
-<!-- TODO: record a short demo GIF (submit order → agents light up in sequence) and
-     add 2–3 screenshots of the dashboard. Drop files in docs/ — they are already
-     linked below. QuickTime screen recording or Kap (getkap.co) work well for GIFs. -->
-
-| Dashboard — live agent feed | Paused for human review |
-|---|---|
-| ![Dashboard](docs/screenshot-dashboard.png) | ![Human approval](docs/screenshot-approval.png) |
-
----
 
 ## Architecture
 
