@@ -14,7 +14,6 @@ A multi-agent AI order fulfillment system built to demonstrate production-grade 
      add 2–3 screenshots of the dashboard. Drop files in docs/ — they are already
      linked below. QuickTime screen recording or Kap (getkap.co) work well for GIFs. -->
 
-[▶️ Watch the demo](docs/happy-path-order-success.mp4)
 | Dashboard — live agent feed | Paused for human review |
 |---|---|
 | ![Dashboard](docs/screenshot-dashboard.png) | ![Human approval](docs/screenshot-approval.png) |
