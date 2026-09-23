@@ -1,6 +1,8 @@
 
-
 https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
+
+<img width="1676" height="814" alt="human-approval-required" src="https://github.com/user-attachments/assets/06006723-9784-4f8f-8fb6-8b3ecd8dbaab" />
+
 
 # X-Men Fulfillment System
 
