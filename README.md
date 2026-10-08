@@ -6,10 +6,10 @@ A multi-agent AI order fulfillment system built to demonstrate production-grade 
 
 ## Demo
 
-**Hosted demo:** the frontend deploys to Netlify as a static site with a built-in
-simulation of the agent pipeline — same event stream, fraud routing, and
-compensation paths, replayed in the browser so the dashboard animates without a
-live backend. See [Deployment](#deployment) for how to point it at the real API.
+**Hosted demo:** https://xmen-fulfillment.netlify.app — a static build running an
+in-browser simulation of the agent pipeline (same event stream, fraud routing,
+and compensation paths), so the dashboard animates without a live backend. See
+[Deployment](#deployment) for how to point it at the real API.
 
 https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
 
