@@ -3,4 +3,5 @@
 backend/**/appsettings.Development.json
 frontend/cerebro-ui/.env.local
 frontend/cerebro-ui/.next/
+frontend/cerebro-ui/out/
 frontend/cerebro-ui/node_modules/

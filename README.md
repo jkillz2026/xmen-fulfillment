@@ -6,6 +6,11 @@ A multi-agent AI order fulfillment system built to demonstrate production-grade 
 
 ## Demo
 
+**Hosted demo:** the frontend deploys to Netlify as a static site with a built-in
+simulation of the agent pipeline — same event stream, fraud routing, and
+compensation paths, replayed in the browser so the dashboard animates without a
+live backend. See [Deployment](#deployment) for how to point it at the real API.
+
 https://github.com/user-attachments/assets/e89b84de-a1ca-4991-8960-4b8491e07c16
 
 **Human review required** — a moderate fraud score pauses the pipeline at `AwaitingApproval`:
@@ -171,3 +176,33 @@ dotnet test XMenFulfillment.Tests
 | Disposable email + high-risk country + total > $1,000 | Risk ≥ 70 → auto-rejected before payment |
 | `pm_capture_fail_*` | Gambit fails → Wolverine releases inventory (Saga) |
 | SKU `X-003` | Wolverine detects out-of-stock → pipeline fails |
+
+---
+
+## Deployment
+
+The dashboard is a fully client-side app, so it can ship as a static site.
+`next.config.ts` uses `output: 'export'` and the repo's `netlify.toml` builds
+`frontend/cerebro-ui` → `out/` on Netlify automatically.
+
+### Two run modes
+
+**Simulated (default, no env vars)** — the static build runs an in-browser
+simulation (`src/lib/demoEngine.ts`) that emits the same `AgentStarted` /
+`AgentCompleted` / `PipelineComplete` contract as the real SignalR hub,
+including fraud routing, `AwaitingApproval`, out-of-stock, and payment-failure
+compensation paths. Zero backend, zero API keys — suitable for a public demo.
+
+**Live** — set both variables at build time to connect to a deployed backend:
+
+| Variable | Example | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://xmen-api.onrender.com` | REST calls: `POST /orders`, approve/reject |
+| `NEXT_PUBLIC_SIGNALR_URL` | `https://xmen-api.onrender.com/hubs/agents` | Real-time agent event stream |
+
+Because `NEXT_PUBLIC_*` vars are inlined at build time, they must be set in the
+Netlify site's environment (or `.env.local` for a local live build) *before*
+`npm run build`. The backend needs a host that supports .NET + WebSockets
+(Render, Railway, Azure App Service, Fly.io — not serverless functions), and its
+CORS policy already allows `https://*.netlify.app`. Local development against
+`localhost:5016` works unchanged via `.env.local`.

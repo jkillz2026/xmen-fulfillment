@@ -1,6 +1,7 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
 import { useAgentHub, AgentEvent } from '../../hooks/useAgentHub';
+import { submitOrder, reviewOrder, LIVE } from '../../lib/api';
 
 const AGENT_META: Record<string, { icon: string; color: string }> = {
   Cerebro:     { icon: '🧠', color: 'text-purple-400' },
@@ -13,8 +14,6 @@ const AGENT_META: Record<string, { icon: string; color: string }> = {
 };
 
 type FeedEntry = AgentEvent & { id: number };
-
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5016';
 
 const DEFAULT_FORM = {
   orderId: '',
@@ -63,7 +62,7 @@ export default function Dashboard() {
     if (e.type === 'pipeline') setPipelineStatus((e as Extract<AgentEvent, { type: 'pipeline' }>).status);
   }, []);
 
-  const { connected } = useAgentHub(addEntry);
+  const { connected, mode } = useAgentHub(addEntry);
 
   async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
@@ -94,11 +93,7 @@ export default function Dashboard() {
     };
 
     try {
-      await fetch(`${API}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      await submitOrder(body);
     } catch (err) {
       console.error('Order submit error:', err);
     } finally {
@@ -124,7 +119,7 @@ export default function Dashboard() {
     if (!activeOrderId) return;
     setReviewing(true);
     try {
-      await fetch(`${API}/orders/${activeOrderId}/${action}`, { method: 'POST' });
+      await reviewOrder(activeOrderId, action);
     } catch (err) {
       console.error(err);
     } finally {
@@ -150,6 +145,11 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs">
+          {mode === 'demo' && (
+            <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">
+              Simulated events — repo runs real GPT agents
+            </span>
+          )}
           <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-500'}`} />
           <span className="text-slate-400">{connected ? 'Live' : 'Disconnected'}</span>
         </div>

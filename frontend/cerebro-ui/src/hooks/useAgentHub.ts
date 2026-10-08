@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
+import { LIVE } from '../lib/api';
+import { onEvent as onDemoEvent } from '../lib/demoEngine';
 
 export type AgentEvent =
   | { type: 'started';   orderId: string; agentName: string; task: string;    timestamp: string }
@@ -13,7 +15,13 @@ export function useAgentHub(onEvent: (e: AgentEvent) => void) {
   callbackRef.current = onEvent;
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_SIGNALR_URL ?? 'http://localhost:5016/hubs/agents';
+    if (!LIVE) {
+      // Static demo build — subscribe to the in-browser pipeline simulation.
+      setConnected(true);
+      return onDemoEvent((e) => callbackRef.current(e));
+    }
+
+    const url = process.env.NEXT_PUBLIC_SIGNALR_URL!;
 
     const conn = new signalR.HubConnectionBuilder()
       .withUrl(url)
@@ -32,5 +40,5 @@ export function useAgentHub(onEvent: (e: AgentEvent) => void) {
     return () => { conn.stop(); };
   }, []);
 
-  return { connected };
+  return { connected, mode: LIVE ? 'live' as const : 'demo' as const };
 }
