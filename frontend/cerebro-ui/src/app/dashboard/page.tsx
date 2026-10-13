@@ -33,6 +33,18 @@ const DEFAULT_FORM = {
 
 type FormKey = keyof typeof DEFAULT_FORM;
 
+// One-click test presets. 'ORD-B2' hashes to a fraud base score of 16 in the
+// demo engine, so each preset's *trigger* is what moves the outcome — same
+// knobs work against the live backend (see backend agents for the real rules).
+const SCENARIOS: { label: string; watch: string; patch: Partial<typeof DEFAULT_FORM> }[] = [
+  { label: '✅ Happy path',    watch: 'All agents pass → Completed',        patch: {} },
+  { label: '📦 Out of stock',  watch: 'Wolverine fails → Failed',           patch: { sku: 'X-003' } },
+  { label: '💳 Card declined', watch: 'Gambit fails → saga rolls back',     patch: { paymentMethodId: 'pm_fail_test' } },
+  { label: '↩️ Capture fails', watch: 'Auth ok, capture fails → compensate', patch: { paymentMethodId: 'pm_capture_fail_test' } },
+  { label: '🟡 Fraud review',  watch: 'Score ~51 → Approve/Reject gate',    patch: { customerEmail: 'test@mailinator.com' } },
+  { label: '🚫 Auto-reject',   watch: 'Score ≥70 → instant fail',           patch: { customerEmail: 'test@mailinator.com', country: 'NG', unitPrice: '1500' } },
+];
+
 export default function Dashboard() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [feed, setFeed] = useState<FeedEntry[]>([]);
@@ -162,6 +174,20 @@ export default function Dashboard() {
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
             Submit Order
           </h2>
+          <p className="text-xs text-slate-500 mb-1.5">Try a scenario:</p>
+          <div className="grid grid-cols-2 gap-1.5 mb-4">
+            {SCENARIOS.map(s => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => setForm({ ...DEFAULT_FORM, orderId: 'ORD-B2', ...s.patch })}
+                className="text-left bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded px-2 py-1.5 transition-colors cursor-pointer"
+              >
+                <div className="text-xs font-medium text-slate-200 leading-tight">{s.label}</div>
+                <div className="text-[10px] text-slate-500 leading-tight mt-0.5">{s.watch}</div>
+              </button>
+            ))}
+          </div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             {field('Order ID (auto-generated if blank)', 'orderId', 'ORD-...')}
             {field('Customer ID', 'customerId')}
