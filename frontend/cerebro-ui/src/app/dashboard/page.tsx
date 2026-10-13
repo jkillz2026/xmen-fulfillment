@@ -76,32 +76,31 @@ export default function Dashboard() {
 
   const { connected, mode } = useAgentHub(addEntry);
 
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function runOrder(f: typeof DEFAULT_FORM) {
     setFeed([]);
     setPipelineStatus(null);
     setSubmitting(true);
 
-    const orderId = form.orderId.trim() || `ORD-${Date.now()}`;
+    const orderId = f.orderId.trim() || `ORD-${Date.now()}`;
     setActiveOrderId(orderId);
     const body = {
       orderId,
-      customerId: form.customerId,
-      customerEmail: form.customerEmail,
+      customerId: f.customerId,
+      customerEmail: f.customerEmail,
       items: [{
-        sku: form.sku,
-        name: form.itemName,
-        quantity: Number(form.quantity),
-        unitPrice: Number(form.unitPrice),
+        sku: f.sku,
+        name: f.itemName,
+        quantity: Number(f.quantity),
+        unitPrice: Number(f.unitPrice),
       }],
       shippingAddress: {
-        line1: form.line1,
-        city: form.city,
-        state: form.state,
-        zip: form.zip,
-        country: form.country,
+        line1: f.line1,
+        city: f.city,
+        state: f.state,
+        zip: f.zip,
+        country: f.country,
       },
-      paymentMethodId: form.paymentMethodId,
+      paymentMethodId: f.paymentMethodId,
     };
 
     try {
@@ -111,6 +110,17 @@ export default function Dashboard() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSubmit(ev: React.FormEvent) {
+    ev.preventDefault();
+    await runOrder(form);
+  }
+
+  function runScenario(patch: Partial<typeof DEFAULT_FORM>) {
+    const next = { ...DEFAULT_FORM, orderId: 'ORD-B2', ...patch };
+    setForm(next);          // reflect the scenario in the visible form
+    void runOrder(next);    // and fire it immediately
   }
 
   function field(label: string, key: FormKey, placeholder?: string) {
@@ -174,13 +184,13 @@ export default function Dashboard() {
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
             Submit Order
           </h2>
-          <p className="text-xs text-slate-500 mb-1.5">Try a scenario:</p>
+          <p className="text-xs text-slate-500 mb-1.5">Try a scenario — one click runs it:</p>
           <div className="grid grid-cols-2 gap-1.5 mb-4">
             {SCENARIOS.map(s => (
               <button
                 key={s.label}
                 type="button"
-                onClick={() => setForm({ ...DEFAULT_FORM, orderId: 'ORD-B2', ...s.patch })}
+                onClick={() => runScenario(s.patch)}
                 className="text-left bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded px-2 py-1.5 transition-colors cursor-pointer"
               >
                 <div className="text-xs font-medium text-slate-200 leading-tight">{s.label}</div>
